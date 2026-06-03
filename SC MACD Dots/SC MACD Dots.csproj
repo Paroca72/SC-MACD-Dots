@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="cTrader.Automate" Version="*" />
+    <PackageReference Include="Skender.Stock.Indicators" Version="2.7.1" />
+  </ItemGroup>
+</Project>
