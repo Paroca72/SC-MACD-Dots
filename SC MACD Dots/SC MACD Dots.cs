@@ -227,7 +227,7 @@ public class SCMACDDots : API.Indicator
             // Constraints
             if (index >= this.Bars.Count) return;
 
-            // Update the series and create the point
+            // Create the point
             this.CreatePoint(index);
 
             // Draw

@@ -63,12 +63,9 @@ namespace cAlgo.Drawer
             }
 
             // Draw label
-            if (first != firstHolder)
-            {
-                int firstVisible = this.indicator.Chart.FirstVisibleBarIndex;
-                PointInfo info = points.ContainsKey(firstVisible) ? points[firstVisible] : null;
-                if (info != null) this.DrawLabel(firstVisible, info);
-            }
+            int firstVisible = this.indicator.Chart.FirstVisibleBarIndex;
+            PointInfo info = points.ContainsKey(firstVisible) ? points[firstVisible] : null;
+            if (info != null) this.DrawLabel(firstVisible, info);
         }
 
         public virtual void Redraw(int first, int last, Dictionary<int, PointInfo> points)
