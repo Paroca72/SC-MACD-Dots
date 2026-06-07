@@ -55,20 +55,8 @@ public class SCMACDDots : API.Indicator
     private DotsDrawer dotsDrawer;
     private CrossingDrawer crossingDrawer;
 
-    private int slowPeriod = 26;
-    private int fastPeriod = 12;
-    private int signalPeriod = 9;
-
-    private bool showCrossing = true;
-    private int offset = 0;
-    private PositionTypes position = PositionTypes.Bottom;
-
-    private Color histogramPositiveColor = Color.Green;
-    private Color histogramNegativeColor = Color.Red;
-    private Color crossingPositiveColor = Color.LimeGreen;
-    private Color crossingNegativeColor = Color.IndianRed;
-
     private bool debug = false;
+    private bool ready = false;
 
     protected override void Initialize()
     {
@@ -85,20 +73,6 @@ public class SCMACDDots : API.Indicator
         this.MACD = this.CreateDataSeries();
         this.Signal = this.CreateDataSeries();
         this.Histogram = this.CreateDataSeries();
-
-        // Fix the old values
-        this.slowPeriod = this.SlowPeriod;
-        this.fastPeriod = this.FastPeriod;
-        this.signalPeriod = this.SignalPeriod;
-
-        this.showCrossing = this.ShowCrossing;
-        this.offset = this.Offset;
-        this.position = this.Position;
-
-        this.histogramPositiveColor = this.HistogramPositiveColor;
-        this.histogramNegativeColor = this.HistogramNegativeColor;
-        this.crossingPositiveColor = this.CrossingPositiveColor;
-        this.crossingNegativeColor = this.CrossingNegativeColor;
 
         // Events
         Chart.ZoomChanged += (ChartZoomEventArgs obj) =>
@@ -118,40 +92,13 @@ public class SCMACDDots : API.Indicator
         };
     }
 
-    private bool HasChanges()
-    {
-        bool result = this.slowPeriod != this.SlowPeriod ||
-            this.fastPeriod != this.FastPeriod ||
-            this.signalPeriod != this.SignalPeriod ||
-            this.showCrossing != this.ShowCrossing ||
-            this.position != this.Position ||
-            this.offset != this.Offset ||
-            this.histogramPositiveColor != this.HistogramPositiveColor ||
-            this.histogramNegativeColor != this.HistogramNegativeColor ||
-            this.crossingPositiveColor != this.CrossingPositiveColor ||
-            this.crossingNegativeColor != this.CrossingNegativeColor;
-
-        this.slowPeriod = this.SlowPeriod;
-        this.fastPeriod = this.FastPeriod;
-        this.signalPeriod = this.SignalPeriod;
-        this.showCrossing = this.ShowCrossing;
-        this.position = this.Position;
-        this.offset = this.Offset;
-        this.histogramPositiveColor = this.HistogramPositiveColor;
-        this.histogramNegativeColor = this.HistogramNegativeColor;
-        this.crossingPositiveColor = this.CrossingPositiveColor;
-        this.crossingNegativeColor = this.CrossingNegativeColor;
-
-        return result;
-    }
-
     private double GetDotY()
     {
         double percentOffset = 0.025 + (this.Offset * 0.01);
         double chartRange = this.Chart.TopY - this.Chart.BottomY;
         double offset = chartRange * percentOffset;
 
-        return this.position == PositionTypes.Top
+        return this.Position == PositionTypes.Top
             ? this.Chart.TopY - offset
             : this.Chart.BottomY + offset;
     }
@@ -160,7 +107,7 @@ public class SCMACDDots : API.Indicator
     {
         double top = this.Chart.TopY;
         double bottom = this.Chart.BottomY;
-        return this.position == PositionTypes.Bottom ?
+        return this.Position == PositionTypes.Bottom ?
             top - (top - bottom) * 0.05 :
             bottom + (top - bottom) * 0.05;
     }
@@ -190,7 +137,7 @@ public class SCMACDDots : API.Indicator
             double delta = !positives.Any() ? histogram : positives.Max(value => value);
 
             double amount = delta != 0 ? 0.3 + (histogram / delta) * 0.7 : 1.0;
-            return Blend(this.histogramPositiveColor, 1.0 - amount);
+            return Blend(this.HistogramPositiveColor, 1.0 - amount);
         }
         else
         {
@@ -198,13 +145,13 @@ public class SCMACDDots : API.Indicator
             double delta = !negatives.Any() ? histogram : negatives.Min(value => value);
 
             double amount = delta != 0 ? 0.3 + (histogram / delta) * 0.7 : 1.0;
-            return Blend(this.histogramNegativeColor, 1.0 - amount);
+            return Blend(this.HistogramNegativeColor, 1.0 - amount);
         }
     }
 
     private MACDResult GetData(int index)
     {
-        int warmup = Math.Max(100, (this.slowPeriod + this.signalPeriod) * 2);
+        int warmup = Math.Max(100, (this.SlowPeriod + this.SignalPeriod) * 2);
         if (index - warmup <= 0) return null;
         if (this.Bars.Count < warmup) return null;
 
@@ -214,9 +161,9 @@ public class SCMACDDots : API.Indicator
         Candle[] candles = bars.Select(bar => Candle.FromBar(bar)).ToArray();
         MACDSettings settings = new()
         {
-            SlowPeriod = this.slowPeriod,
-            FastPeriod = this.fastPeriod,
-            SignalPeriod = this.signalPeriod,
+            SlowPeriod = this.SlowPeriod,
+            FastPeriod = this.FastPeriod,
+            SignalPeriod = this.SignalPeriod,
         };
         return new MACDAnalyzer(candles, settings).Result;
     }
@@ -262,15 +209,15 @@ public class SCMACDDots : API.Indicator
         if (force)
         {
             this.dotsDrawer.Redraw(first, last, this.points);
-            if (this.showCrossing) this.crossingDrawer.Redraw(first, last, this.points);
+            if (this.ShowCrossing) this.crossingDrawer.Redraw(first, last, this.points);
         }
         else
         {
             this.dotsDrawer.Draw(first, last, this.points);
-            if (this.showCrossing) this.crossingDrawer.Draw(first, last, this.points);
+            if (this.ShowCrossing) this.crossingDrawer.Draw(first, last, this.points);
         }
 
-        if (!this.showCrossing) this.crossingDrawer.Remove();
+        if (!this.ShowCrossing) this.crossingDrawer.Remove();
     }
 
     public override void Calculate(int index)
@@ -280,14 +227,12 @@ public class SCMACDDots : API.Indicator
             // Constraints
             if (index >= this.Bars.Count) return;
 
-            // If has some changes need to update all the points
-            if (this.HasChanges()) this.UpdatePoints(true);
-
             // Update the series and create the point
             this.CreatePoint(index);
 
             // Draw
-            this.Draw(false);
+            if (index >= this.Chart.FirstVisibleBarIndex) ready = true;
+            if (this.ready) this.Draw(false);
         }
         catch (Exception ex)
         {

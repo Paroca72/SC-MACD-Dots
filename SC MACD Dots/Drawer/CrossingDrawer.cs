@@ -16,7 +16,6 @@ namespace cAlgo.Drawer
         public override void DrawPoint(int index, PointInfo point)
         {
             if (point?.CrossedType == null) return;
-            this.indicator.Print("OK");
             ChartIconType icon = point.CrossedType == MACDCrossTypes.upwards ? ChartIconType.UpArrow : ChartIconType.DownArrow;
 
             string lineName = PrefixLine + index;
