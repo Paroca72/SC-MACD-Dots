@@ -153,7 +153,7 @@ public class SCMACDDots : API.Indicator
     {
         int warmup = Math.Max(100, (this.SlowPeriod + this.SignalPeriod) * 2);
         if (index - warmup <= 0) return null;
-        if (this.Bars.Count < warmup) return null;
+        if (this.Chart.Bars.Count < warmup) return null;
 
         IEnumerable<Bar> bars = this.Bars.Skip(index - warmup).Take(warmup);
         if (bars.Count() < warmup) return null;
@@ -225,13 +225,17 @@ public class SCMACDDots : API.Indicator
         try
         {
             // Constraints
-            if (index >= this.Bars.Count) return;
+            if (index >= this.Chart.Bars.Count) return;
+            if (!this.ready && index == this.Chart.Bars.Count - 1)
+            {
+                this.ready = true;
+                if (this.debug) this.Print("Ready");
+            }
 
             // Create the point
             this.CreatePoint(index);
 
             // Draw
-            if (index >= this.Chart.FirstVisibleBarIndex) ready = true;
             if (this.ready) this.Draw(false);
         }
         catch (Exception ex)
