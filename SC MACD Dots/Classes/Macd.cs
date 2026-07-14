@@ -50,7 +50,7 @@ namespace cAlgo.Analyzers
             int currentSign = Math.Sign(currentHistogram);
             if (currentSign == 0) return null;
 
-            for (int index = histograms.Length - 2; index >= 0; index++)
+            for (int index = histograms.Length - 2; index >= 0; index--)
             {
                 double? previous = histograms[index];
 
